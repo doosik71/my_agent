@@ -1,0 +1,8 @@
+google-generativeai
+streamlit
+Flask
+FastAPI
+python-dotenv
+uvicorn
+twilio
+langchain
