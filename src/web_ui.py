@@ -1,12 +1,28 @@
 import streamlit as st
-from agent_core import get_agent_response, doc_manager, model # Import 'model' to start chat session
 import os
-import google.generativeai as genai # Import genai to access ToolCode and FunctionCall
+import sys
+
+# 현재 스크립트(web_ui.py)의 절대 경로
+current_script_dir = os.path.dirname(os.path.abspath(__file__))
+# 프로젝트 루트 디렉토리 (src의 상위 디렉토리)
+project_root = os.path.join(current_script_dir, os.pardir)
+# 프로젝트 루트를 sys.path에 추가하여 src 모듈을 찾을 수 있도록 함
+sys.path.insert(0, os.path.abspath(project_root))
+
+from src.agent_core import MyAgent
+from src.tools.tool_definitions import doc_manager # doc_manager는 여전히 전역 변수로 tools.tool_definitions에 있습니다.
+
 
 st.set_page_config(page_title="my_agent Web UI", layout="wide")
 
 st.title("🤖 my_agent: Gemini-Powered Autonomous Agent")
 st.markdown("---")
+
+# Initialize MyAgent
+if "my_agent_instance" not in st.session_state:
+    st.session_state.my_agent_instance = MyAgent(model_name=os.getenv("GEMINI_MODEL_NAME", "gemini-2.5-flash"))
+
+agent = st.session_state.my_agent_instance
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -14,7 +30,10 @@ if "messages" not in st.session_state:
 
 # Initialize chat session if it doesn't exist
 if "chat_session" not in st.session_state:
-    st.session_state.chat_session = model.start_chat(enable_automatic_function_calling=True)
+    st.session_state.chat_session = agent.client.chats.create(
+        model=agent.model_name,
+        config=agent.config
+    )
 
 # Display chat messages from history on app rerun
 for message in st.session_state.messages:
@@ -24,37 +43,48 @@ for message in st.session_state.messages:
 # User input
 if prompt := st.chat_input("Ask my_agent a question or give a command..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
+
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.spinner("my_agent is thinking..."):
-        # Get full response object from agent_core.py, passing the persistent chat session
-        response_obj = get_agent_response(prompt, st.session_state.chat_session)
-        
-        # Process the response object
+        # agent_core의 send_message 호출
+        response_obj = agent.send_message(
+            prompt, st.session_state.chat_session)
+
         full_response_content = ""
         with st.chat_message("assistant"):
-            for part in response_obj.parts:
-                if part.text:
-                    st.markdown(part.text)
-                    full_response_content += part.text
-                if part.function_call:
-                    st.info(f"Agent called tool: **{part.function_call.name}** with args: `{part.function_call.args}`")
-                    # The output of the tool call is automatically added to the chat history for the next turn.
+            if hasattr(response_obj, 'candidates') and response_obj.candidates:
+                for part in response_obj.candidates[0].content.parts:
+                    if part.text:
+                        st.markdown(part.text)
+                        full_response_content += part.text
 
-    # Add agent's full response (text content only) to chat history
-    st.session_state.messages.append({"role": "assistant", "content": full_response_content})
+                    if part.function_call:
+                        call = part.function_call
+                        st.info(
+                            f"🛠️ **도구 실행:** `{call.name}`\n\n"
+                            f"**입력값:** `{call.args}`"
+                        )
+            else:
+                st.error(getattr(response_obj, 'text',
+                         "Unknown Error Occurred"))
+                full_response_content = getattr(response_obj, 'text', "")
+
+    st.session_state.messages.append(
+        {"role": "assistant", "content": full_response_content})
 
 st.sidebar.title("📚 Documents in Sandbox")
 st.sidebar.markdown("---")
 
-# Display documents in the sidebar
 with st.sidebar:
     st.subheader("Existing Documents")
-    documents_list = doc_manager.list_docs().split('\n')
-    
+    docs_raw = doc_manager.list_docs()
+    documents_list = docs_raw.split('\n') if docs_raw else []
+
     if documents_list and documents_list[0] != "No documents found.":
-        selected_doc = st.selectbox("Select a document to view:", documents_list)
+        selected_doc = st.selectbox(
+            "Select a document to view:", documents_list)
         if selected_doc:
             doc_content = doc_manager.read_doc(selected_doc)
             st.text_area(f"Content of {selected_doc}", doc_content, height=300)
@@ -62,4 +92,5 @@ with st.sidebar:
         st.info("No documents found yet. Ask my_agent to create one!")
 
 st.sidebar.markdown("---")
-st.sidebar.info("You can instruct my_agent to 'write_doc(\"path/to/file.md\", \"Your content here\")' or 'read_doc(\"path/to/file.md\")'.")
+st.sidebar.info(
+    "You can instruct my_agent to 'write_doc(\"path/to/file.md\", \"Your content here\")' or 'read_doc(\"path/to/file.md\")'.")

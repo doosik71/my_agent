@@ -79,7 +79,9 @@ my_agent/
 
    ```ini
    GOOGLE_API_KEY=your_gemini_api_key
-   SEARCH_API_KEY=your_serper_api_key
+   GEMINI_MODEL_NAME=model_name_here
+   # 인터넷 검색 시
+      SEARCH_API_KEY=your_serper_api_key
    # WhatsApp 사용 시
    WHATSAPP_TOKEN=your_token
    ```
