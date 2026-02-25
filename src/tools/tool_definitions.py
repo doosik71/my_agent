@@ -1,8 +1,9 @@
 from .document_manager import DocumentManager
 from .time_utils import get_current_datetime
-from .arxiv_utils import search_arxiv  # Import the new arxiv search tool
-from .pdf_utils import read_pdf_from_url  # Import the new PDF reader tool
-from .web_search_utils import search_web  # Import the new web search tool
+from .arxiv_utils import search_arxiv
+from .pdf_utils import read_pdf_from_url
+from .web_search_utils import search_web
+from .web_fetch_utils import fetch_web_content
 
 
 # Initialize Document Manager
@@ -16,5 +17,6 @@ tools = [
     get_current_datetime,
     search_arxiv,
     read_pdf_from_url,
-    search_web
+    search_web,
+    fetch_web_content
 ]

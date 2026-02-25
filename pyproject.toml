@@ -17,4 +17,5 @@ dependencies = [
     "arxiv>=1.4.0",
     "PyMuPDF>=1.23.0",
     "ddgs>=9.10.0",
+    "beautifulsoup4>=4.14.3",
 ]

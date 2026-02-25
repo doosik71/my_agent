@@ -2,12 +2,12 @@ from src.agent_core import MyAgent
 from src.tools.tool_definitions import doc_manager
 import streamlit as st  # pyright: ignore[reportMissingImports]
 import os
-import sys
 
 
-st.set_page_config(page_title="my_agent Web UI", layout="wide")
+st.set_page_config(page_title="My Agent", layout="wide")
 
-st.title("🤖 my_agent: Gemini-Powered Autonomous Agent")
+st.title("🤖 My Agent")
+st.markdown("### Gemini-Powered Autonomous Agent")
 st.markdown("---")
 
 # Initialize MyAgent
@@ -67,8 +67,7 @@ if prompt := st.chat_input("Ask my_agent a question or give a command..."):
     st.session_state.messages.append(
         {"role": "assistant", "content": full_response_content})
 
-st.sidebar.title("📚 Documents in Sandbox")
-st.sidebar.markdown("---")
+st.sidebar.title("🤖 My Agent")
 
 with st.sidebar:
     st.subheader("Existing Documents")
@@ -80,10 +79,9 @@ with st.sidebar:
             "Select a document to view:", documents_list)
         if selected_doc:
             doc_content = doc_manager.read_doc(selected_doc)
-            st.text_area(f"Content of {selected_doc}", doc_content, height=300)
+            st.text_area(f"Content of {selected_doc}", doc_content, height=600)
     else:
         st.info("No documents found yet. Ask my_agent to create one!")
 
-st.sidebar.markdown("---")
 st.sidebar.info(
-    "You can instruct my_agent to 'write_doc(\"path/to/file.md\", \"Your content here\")' or 'read_doc(\"path/to/file.md\")'.")
+    "https://github.com/doosik71/my_agent/")

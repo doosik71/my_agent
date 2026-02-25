@@ -1,7 +1,7 @@
 import json
 import os
 import requests  # pyright: ignore[reportMissingModuleSource]
-from ddgs import DDGS  # DuckDuckGo 검색 라이브러리 추가
+from ddgs import DDGS  # pyright: ignore[reportMissingImports]
 
 
 def search_web_serper(query: str, num_results: int = 20) -> str:
