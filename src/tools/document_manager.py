@@ -1,6 +1,4 @@
-import os
 import pathlib
-from typing import List, Optional
 
 
 class DocumentManager:

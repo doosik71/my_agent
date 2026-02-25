@@ -119,6 +119,33 @@ python my_agent.py run telegram
 
 봇이 실행되면, 텔레그램 앱에서 `@<봇사용자이름>` (예: `@my_agent_telegram_bot`)으로 봇을 검색하여 대화를 시작할 수 있습니다.
 
+## 툴 함수 Docstring 작성 가이드 (Tool Function Docstring Guidelines)
+
+`my_agent`는 툴 함수의 Docstring을 분석하여 에이전트의 시스템 명령어(System Instruction)를 자동으로 생성합니다. 따라서 툴 함수를 추가하거나 수정할 때는 다음 가이드라인에 따라 Docstring을 작성해야 에이전트가 툴을 올바르게 이해하고 활용할 수 있습니다.
+
+- **첫 줄 (Summary):** 툴의 목적과 언제 사용해야 하는지 간결하게 설명합니다. 이 부분이 에이전트의 주요 지침으로 사용됩니다.
+- **상세 설명 (Details):** 첫 줄 이후에 툴의 기능, 인자, 반환 값 등에 대한 자세한 설명을 추가할 수 있습니다. 에이전트가 툴을 더 잘 이해하고 정확하게 사용할 수 있도록 돕습니다.
+- **예시 (Examples - Optional):** 필요한 경우 툴 사용 예시를 추가하여 에이전트의 이해를 돕습니다.
+
+**예시:**
+
+```python
+def example_tool(arg1: str, arg2: int) -> str:
+    """
+    이 툴은 arg1과 arg2를 사용하여 어떤 작업을 수행합니다.
+    사용자가 X를 요청할 때 이 툴을 사용하세요.
+    
+    Args:
+        arg1: 첫 번째 인자에 대한 설명입니다.
+        arg2: 두 번째 인자에 대한 설명입니다.
+
+    Returns:
+        작업 결과에 대한 설명입니다.
+    """
+    # ... 툴 구현 ...
+    pass
+```
+
 ## 라이선스
 
 MIT License

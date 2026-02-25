@@ -1,5 +1,6 @@
 import datetime
 
+
 def get_current_datetime() -> str:
     """
     Returns the current date, day of the week, and time.
