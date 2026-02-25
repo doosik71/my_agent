@@ -83,7 +83,10 @@ my_agent/
    # 인터넷 검색 시
       SEARCH_API_KEY=your_serper_api_key
    # WhatsApp 사용 시
-   WHATSAPP_TOKEN=your_token
+   WHATSAPP_TOKEN=your_token # Twilio 또는 Meta 개발자 대시보드에서 획득
+**WHATSAPP_TOKEN 획득 방법:**
+- **Twilio**: Twilio Console에서 WhatsApp Business API를 설정하면, 웹훅 보안을 위한 'Auth Token' 또는 'Webhook Secret'을 얻을 수 있습니다. `WHATSAPP_TOKEN`으로 이 값을 사용합니다.
+- **Meta for Developers (WhatsApp Business Platform)**: Meta for Developers 대시보드에서 WhatsApp Business Platform 앱을 생성하고 설정하는 과정에서 앱 토큰이나 웹훅 보안 검증 토큰을 얻을 수 있습니다. 자세한 내용은 Meta의 공식 문서를 참조하십시오.
    ```
 
 ## 사용 방법 (Usage)
