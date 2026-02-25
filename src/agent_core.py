@@ -1,7 +1,7 @@
 import os
 from google import genai
-from google.genai import types
-from dotenv import load_dotenv
+from google.genai import types  # pyright: ignore[reportMissingImports]
+from dotenv import load_dotenv  # pyright: ignore[reportMissingImports]
 from src.tools.tool_definitions import tools
 
 

@@ -1,16 +1,8 @@
-import streamlit as st
+from src.agent_core import MyAgent
+from src.tools.tool_definitions import doc_manager
+import streamlit as st  # pyright: ignore[reportMissingImports]
 import os
 import sys
-
-# 현재 스크립트(web_ui.py)의 절대 경로
-current_script_dir = os.path.dirname(os.path.abspath(__file__))
-# 프로젝트 루트 디렉토리 (src의 상위 디렉토리)
-project_root = os.path.join(current_script_dir, os.pardir)
-# 프로젝트 루트를 sys.path에 추가하여 src 모듈을 찾을 수 있도록 함
-sys.path.insert(0, os.path.abspath(project_root))
-
-from src.agent_core import MyAgent
-from src.tools.tool_definitions import doc_manager # doc_manager는 여전히 전역 변수로 tools.tool_definitions에 있습니다.
 
 
 st.set_page_config(page_title="my_agent Web UI", layout="wide")
@@ -20,7 +12,8 @@ st.markdown("---")
 
 # Initialize MyAgent
 if "my_agent_instance" not in st.session_state:
-    st.session_state.my_agent_instance = MyAgent(model_name=os.getenv("GEMINI_MODEL_NAME", "gemini-2.5-flash"))
+    st.session_state.my_agent_instance = MyAgent(
+        model_name=os.getenv("GEMINI_MODEL_NAME", "gemini-2.5-flash"))
 
 agent = st.session_state.my_agent_instance
 

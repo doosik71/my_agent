@@ -4,4 +4,5 @@ __pycache__
 
 .env
 commit_message.txt
+/temp/
 docs/**

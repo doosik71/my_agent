@@ -27,13 +27,13 @@
 ### 4. 멀티 인터페이스 (Multi-Interface)
 
 - **Web UI**: 직관적인 웹 인터페이스를 통해 에이전트와 대화하고, 실시간으로 생성되는 문서를 확인할 수 있습니다.
-- **WhatsApp**: 모바일 메신저를 통해 언제 어디서든 에이전트에게 지시를 내리고 정보를 얻을 수 있습니다.
+- **Telegram**: 전 세계적으로 널리 쓰이는 텔레그램 메신저를 통해 언제 어디서든 에이전트에게 지시를 내리고 정보를 얻을 수 있습니다.
 
 ## 기술 스택 (Tech Stack)
 
 - **Language**: Python 3.10+
 - **AI Model**: Google Gemini Flash 2.5 Lite
-- **Frameworks**: Streamlit (Web UI), Flask/FastAPI (WhatsApp Server)
+- **Frameworks**: Streamlit (Web UI), python-telegram-bot (Telegram Bot)
 
 ## 디렉토리 구조
 
@@ -45,7 +45,7 @@ my_agent/
 ├── src/
 │   ├── agent_core.py   # Gemini 및 Tool 로직
 │   ├── web_ui.py       # 웹 인터페이스 구현체
-│   └── whatsapp.py     # 왓츠앱 연동 모듈
+│   ├── telegram_bot.py # 텔레그램 연동 모듈
 ├── .env                # API 키 설정 파일
 └── README.md
 ```
@@ -57,7 +57,7 @@ my_agent/
 - Python 3.10 이상
 - Google Gemini API Key
 - (선택) Google Search (Serper) API Key (인터넷 검색용)
-- (선택) Twilio/Meta API Key (WhatsApp 연동용)
+- (선택) Telegram Bot Token (텔레그램 연동용)
 
 ### 설치 (Installation)
 
@@ -71,7 +71,7 @@ my_agent/
 2. 의존성 패키지 설치
 
    ```bash
-   uv pip install -r requirements.txt
+   uv sync
    ```
 
 3. 환경 변수 설정
@@ -81,13 +81,23 @@ my_agent/
    GOOGLE_API_KEY=your_gemini_api_key
    GEMINI_MODEL_NAME=model_name_here
    # 인터넷 검색 시
-      SEARCH_API_KEY=your_serper_api_key
-   # WhatsApp 사용 시
-   WHATSAPP_TOKEN=your_token # Twilio 또는 Meta 개발자 대시보드에서 획득
-**WHATSAPP_TOKEN 획득 방법:**
-- **Twilio**: Twilio Console에서 WhatsApp Business API를 설정하면, 웹훅 보안을 위한 'Auth Token' 또는 'Webhook Secret'을 얻을 수 있습니다. `WHATSAPP_TOKEN`으로 이 값을 사용합니다.
-- **Meta for Developers (WhatsApp Business Platform)**: Meta for Developers 대시보드에서 WhatsApp Business Platform 앱을 생성하고 설정하는 과정에서 앱 토큰이나 웹훅 보안 검증 토큰을 얻을 수 있습니다. 자세한 내용은 Meta의 공식 문서를 참조하십시오.
+   SEARCH_API_KEY=your_serper_api_key
+   # Telegram 사용 시
+   TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+   TELEGRAM_AUTHORIZED_USERS=comma_separated_telegram_user_ids # 예: 123456789,987654321
    ```
+
+**TELEGRAM_BOT_TOKEN 획득 방법:**
+
+- 텔레그램에서 [@BotFather](https://t.me/botfather)를 검색합니다.
+- `/newbot` 명령어를 입력하고 안내에 따라 봇 이름과 사용자명을 설정합니다.
+- 생성이 완료되면 제공되는 `HTTP API token`을 복사하여 `.env` 파일에 붙여넣습니다.
+
+**Telegram User ID 확인 방법:**
+
+- 텔레그램에서 [@userinfobot](https://t.me/userinfobot) 또는 [@getidsbot](https://t.me/getidsbot)을 검색합니다.
+- 해당 봇에게 `/start` 명령어를 보내면 자신의 User ID를 알려줍니다.
+- 이 ID를 `TELEGRAM_AUTHORIZED_USERS`에 설정합니다. 여러 사용자 ID를 추가하려면 쉼표로 구분합니다 (예: `123456789,987654321`).
 
 ## 사용 방법 (Usage)
 
@@ -96,16 +106,18 @@ my_agent/
 브라우저를 통해 에이전트와 대화하려면 다음 명령어를 실행하세요.
 
 ```bash
-streamlit run src/web_ui.py
+python my_agent.py run web
 ```
 
-### WhatsApp 봇 모드
+### Telegram 봇 모드
 
 메신저 연동 서버를 실행하려면 다음 명령어를 실행하세요.
 
 ```bash
-python src/whatsapp.py
+python my_agent.py run telegram
 ```
+
+봇이 실행되면, 텔레그램 앱에서 `@<봇사용자이름>` (예: `@my_agent_telegram_bot`)으로 봇을 검색하여 대화를 시작할 수 있습니다.
 
 ## 라이선스
 

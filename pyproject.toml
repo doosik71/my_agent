@@ -10,6 +10,7 @@ dependencies = [
     "google-genai>=1.64.0",
     "langchain>=1.2.10",
     "python-dotenv>=1.2.1",
+    "python-telegram-bot>=22.6",
     "streamlit>=1.54.0",
     "twilio>=9.10.2",
     "uvicorn>=0.41.0",
