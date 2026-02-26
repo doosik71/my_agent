@@ -69,19 +69,48 @@ if prompt := st.chat_input("Ask my_agent a question or give a command..."):
 
 st.sidebar.title("🤖 My Agent")
 
-with st.sidebar:
+
+@st.fragment
+def document_explorer():
     st.subheader("Existing Documents")
+
+    filter_query = st.text_input(
+        "Filter documents",
+        placeholder="Search (Press Enter to apply)",
+        label_visibility="collapsed",
+        key="doc_filter_input"
+    ).lower()
+
     docs_raw = doc_manager.list_docs()
-    documents_list = docs_raw.split('\n') if docs_raw else []
+    # 빈 줄 제외 및 리스트 변환
+    documents_list = [d.strip()
+                      for d in docs_raw.split('\n') if d.strip()] if docs_raw else []
 
     if documents_list and documents_list[0] != "No documents found.":
-        selected_doc = st.selectbox(
-            "Select a document to view:", documents_list)
-        if selected_doc:
-            doc_content = doc_manager.read_doc(selected_doc)
-            st.text_area(f"Content of {selected_doc}", doc_content, height=600)
+        # 필터링 적용
+        if filter_query:
+            filtered_docs = [
+                doc for doc in documents_list if filter_query in doc.lower()]
+        else:
+            filtered_docs = documents_list
+
+        if filtered_docs:
+            selected_doc = st.selectbox(
+                "Select a document to view:",
+                filtered_docs,
+                key="doc_selectbox"
+            )
+            if selected_doc:
+                doc_content = doc_manager.read_doc(selected_doc)
+                st.text_area(f"Content of {selected_doc}",
+                             doc_content, height=600)
+        else:
+            st.info("일치하는 문서가 없습니다.")
     else:
         st.info("No documents found yet. Ask my_agent to create one!")
 
-st.sidebar.info(
-    "https://github.com/doosik71/my_agent/")
+
+with st.sidebar:
+    document_explorer()
+    st.markdown("---")
+    st.info("https://github.com/doosik71/my_agent/")

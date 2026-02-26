@@ -1,2 +1,2 @@
 @echo off
-python my_agent.py run web
+.venv\Scripts\python.exe my_agent.py run web
