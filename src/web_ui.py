@@ -35,6 +35,14 @@ for message in st.session_state.messages:
 
 # User input
 if prompt := st.chat_input("Ask my_agent a question or give a command..."):
+    if prompt.strip() == "/clear":
+        st.session_state.messages = []
+        st.session_state.chat_session = agent.client.chats.create(
+            model=agent.model_name,
+            config=agent.config
+        )
+        st.rerun()
+
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     with st.chat_message("user"):
