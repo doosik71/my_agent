@@ -89,13 +89,13 @@ my_agent/
 
 **TELEGRAM_BOT_TOKEN 획득 방법:**
 
-- 텔레그램에서 [@BotFather](https://t.me/botfather)를 검색합니다.
-- `/newbot` 명령어를 입력하고 안내에 따라 봇 이름과 사용자명을 설정합니다.
+- 텔레그램에서 `@BotFather`(BotFather)를 검색합니다.
+- `/newbot` 명령어를 입력하고 안내에 따라 `봇 이름`과 `사용자명`을 설정합니다.
 - 생성이 완료되면 제공되는 `HTTP API token`을 복사하여 `.env` 파일에 붙여넣습니다.
 
 **Telegram User ID 확인 방법:**
 
-- 텔레그램에서 [@userinfobot](https://t.me/userinfobot) 또는 [@getidsbot](https://t.me/getidsbot)을 검색합니다.
+- 텔레그램에서 `@userinfobot`(User Info·Get ID·IDbot)을 검색합니다.
 - 해당 봇에게 `/start` 명령어를 보내면 자신의 User ID를 알려줍니다.
 - 이 ID를 `TELEGRAM_AUTHORIZED_USERS`에 설정합니다. 여러 사용자 ID를 추가하려면 쉼표로 구분합니다 (예: `123456789,987654321`).
 
