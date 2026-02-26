@@ -65,23 +65,24 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         response_text = ""
         if hasattr(response_obj, 'text') and response_obj.text:
             response_text = response_obj.text
-        elif hasattr(response_obj, 'candidates') and response_obj.candidates:
+        elif (hasattr(response_obj, 'candidates') and response_obj.candidates and
+              response_obj.candidates[0].content and response_obj.candidates[0].content.parts):
             for part in response_obj.candidates[0].content.parts:
                 if part.text:
                     response_text += part.text
                 if part.function_call:
                     # Inform user about tool calls (optional, but helpful for transparency)
-                    tool_info = f"\n\n🛠️ *도구 실행:* `{part.function_call.name}`"
+                    tool_info = f"\n\n🛠️ *Tool Called:* `{part.function_call.name}`"
                     response_text += tool_info
         else:
-            response_text = "죄송합니다. 응답을 생성하는 중에 문제가 발생했습니다."
+            response_text = "Sorry, something went wrong while generating the response."
 
         # Send response back to Telegram
         await update.message.reply_text(response_text, parse_mode=None)
 
     except Exception as e:
         logging.error(f"Error handling message: {e}")
-        await update.message.reply_text(f"오류가 발생했습니다: {e}")
+        await update.message.reply_text(f"An error occurred: {e}")
 
 
 def main():

@@ -56,8 +56,8 @@ if prompt := st.chat_input("Ask my_agent a question or give a command..."):
                     if part.function_call:
                         call = part.function_call
                         st.info(
-                            f"🛠️ **도구 실행:** `{call.name}`\n\n"
-                            f"**입력값:** `{call.args}`"
+                            f"🛠️ **Tool Called:** `{call.name}`\n\n"
+                            f"**Input:** `{call.args}`"
                         )
             else:
                 st.error(getattr(response_obj, 'text',
@@ -104,8 +104,12 @@ def document_explorer():
                 doc_content = doc_manager.read_doc(selected_doc)
                 st.text_area(f"Content of {selected_doc}",
                              doc_content, height=600)
+                if st.button("Show in Conversation Window"):
+                    st.session_state.messages.append(
+                        {"role": "assistant", "content": f"**📄 Document: {selected_doc}**\n\n{doc_content}"})
+                    st.rerun()
         else:
-            st.info("일치하는 문서가 없습니다.")
+            st.info("No matching documents.")
     else:
         st.info("No documents found yet. Ask my_agent to create one!")
 
