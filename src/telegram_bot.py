@@ -77,7 +77,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             response_text = "죄송합니다. 응답을 생성하는 중에 문제가 발생했습니다."
 
         # Send response back to Telegram
-        await update.message.reply_text(response_text, parse_mode='Markdown')
+        await update.message.reply_text(response_text, parse_mode=None)
 
     except Exception as e:
         logging.error(f"Error handling message: {e}")
