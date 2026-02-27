@@ -2,21 +2,23 @@
 
 ## 프로젝트 개요
 
-**my_agent**는 OpenClaw(Open Interpreter 계열)의 자율 에이전트 개념을 기반으로 구축된 개인화된 AI 에이전트입니다. Google의 **Gemini** 모델을 핵심 두뇌로 사용하여 사용자와 소통하며, 스스로 판단하여 정보를 수집하고 체계적으로 정리합니다.
+**my_agent**는 자율 에이전트 개념을 기반으로 구축된 개인화된 AI 에이전트입니다. Google의 **Gemini** 또는 로컬 **Ollama** 모델을 핵심 두뇌로 사용하여 사용자와 소통하며, 스스로 판단하여 정보를 수집하고 체계적으로 정리합니다.
 
 이 프로젝트는 기존 자율 에이전트의 보안 취약점을 보완하기 위해 **파일 시스템 접근을 엄격하게 제한(Sandboxing)**하며, `docs` 폴더를 에이전트의 "제2의 두뇌(Second Brain)"로 활용합니다.
 
 ## 주요 기능
 
-### 1. Gemini 기반의 지능형 처리
+### 1. AI 모델 기반의 지능형 처리
 
-- Google Gemini 모델을 사용하여 사용자의 자연어 명령을 이해하고 복잡한 추론을 수행합니다.
+- Google Gemini 또는 로컬 Ollama와 같은 다양한 AI 모델을 사용하여 사용자의 자연어 명령을 이해하고 복잡한 추론을 수행합니다.
 - 대화의 맥락을 파악하여 적절한 도구(검색, 파일 저장 등)를 호출합니다.
+- **주요 개선 사항**: 이제 `AI_PROVIDER` 환경 변수를 통해 `gemini` 또는 `ollama`를 선택하여 사용할 수 있습니다. 이를 통해 클라우드 기반 모델과 로컬 모델을 유연하게 활용할 수 있습니다.
 
 ### 2. 자율적 지식 관리 (Autonomous Knowledge Management)
 
 - **Docs 중심의 기억 저장**: 사용자와의 대화 중 기억해야 할 정보나 요청받은 내용을 `docs` 폴더에 저장합니다.
 - **자율적 구조화**: 에이전트는 `docs` 폴더 내에 스스로 하위 폴더를 생성하고, 적절한 마크다운(.md) 파일 이름으로 문서를 작성 및 업데이트합니다.
+- **문서 관리 도구**: 에이전트는 `write_doc`, `read_doc`, `list_docs`, `rename_doc`, `move_doc`, `delete_doc`와 같은 기능을 통해 문서를 생성, 읽기, 나열, 이름 변경, 이동, 삭제할 수 있습니다.
 - **RAG (Retrieval-Augmented Generation)**: 사용자의 질문에 답하기 위해 인터넷 검색뿐만 아니라, `docs` 폴더에 자신이 기록해 둔 정보를 다시 찾아보고 답변합니다.
 
 ### 3. 보안 강화 (Security & Sandboxing)
@@ -26,13 +28,32 @@
 
 ### 4. 멀티 인터페이스 (Multi-Interface)
 
-- **Web UI**: 직관적인 웹 인터페이스를 통해 에이전트와 대화하고, 실시간으로 생성되는 문서를 확인할 수 있습니다.
+- **Web UI**: 직관적인 웹 인터페이스를 통해 에이전트와 대화하고, 사이드바의 **문서 탐색기(Document Explorer)**를 통해 실시간으로 생성되는 문서를 확인하거나 내용을 열람할 수 있습니다.
 - **Telegram**: 전 세계적으로 널리 쓰이는 텔레그램 메신저를 통해 언제 어디서든 에이전트에게 지시를 내리고 정보를 얻을 수 있습니다.
+
+### 5. 확장 가능한 툴 사용 (Extensible Tool Usage)
+
+my_agent는 다양한 작업을 수행하기 위해 다음과 같은 내장 툴을 활용합니다. 이 툴들은 `src/tools/tool_definitions.py`에서 정의되며, 필요에 따라 쉽게 확장할 수 있습니다.
+
+- **문서 관리 툴 (Document Management Tools)**
+  - `write_doc(path, content)`: 새로운 문서를 생성하거나 기존 문서를 업데이트합니다.
+  - `read_doc(path)`: 지정된 경로의 문서 내용을 읽습니다.
+  - `list_docs(path)`: 지정된 경로 내의 문서 및 디렉토리 목록을 나열합니다.
+  - `rename_doc(old_path, new_path)`: 문서 또는 디렉토리의 이름을 변경합니다.
+  - `move_doc(source_path, destination_path)`: 문서 또는 디렉토리를 다른 위치로 이동합니다.
+  - `delete_doc(path)`: 지정된 경로의 문서 또는 디렉토리를 삭제합니다.
+- **정보 검색 툴 (Information Retrieval Tools)**
+  - `search_web(query)`: Google 검색을 통해 웹 정보를 검색합니다.
+  - `fetch_web_content(url)`: 특정 URL의 웹 페이지 내용을 가져옵니다.
+  - `search_arxiv(keyword)`: arXiv에서 학술 논문을 검색합니다.
+  - `read_pdf_from_url(url)`: PDF URL에서 텍스트 내용을 추출합니다.
+- **유틸리티 툴 (Utility Tools)**
+  - `get_current_datetime()`: 현재 날짜와 시간을 반환합니다.
 
 ## 기술 스택 (Tech Stack)
 
 - **Language**: Python 3.10+
-- **AI Model**: Google Gemini Flash 2.5 Lite
+- **AI Model**: Google Gemini (Flash 2.5 Lite) / Local Ollama (e.g., gpt-oss)
 - **Frameworks**: Streamlit (Web UI), python-telegram-bot (Telegram Bot)
 
 ## 디렉토리 구조
@@ -46,6 +67,7 @@ my_agent/
 │   ├── agent_core.py   # Gemini 및 Tool 로직
 │   ├── web_ui.py       # 웹 인터페이스 구현체
 │   ├── telegram_bot.py # 텔레그램 연동 모듈
+│   └── tools/          # 에이전트가 사용하는 모든 외부 도구 정의 및 구현
 ├── .env                # API 키 설정 파일
 └── README.md
 ```
@@ -55,7 +77,8 @@ my_agent/
 ### 필수 조건 (Prerequisites)
 
 - Python 3.10 이상
-- Google Gemini API Key
+- Google Gemini API Key (Gemini 사용 시)
+- Ollama 설치 및 모델 다운로드 (Ollama 사용 시)
 - (선택) Google Search (Serper) API Key (인터넷 검색용)
 - (선택) Telegram Bot Token (텔레그램 연동용)
 
@@ -78,8 +101,14 @@ my_agent/
    `.env` 파일을 생성하고 필요한 키를 입력합니다.
 
    ```ini
+   AI_PROVIDER=gemini # 또는 ollama
    GOOGLE_API_KEY=your_gemini_api_key
-   GEMINI_MODEL_NAME=model_name_here
+   GEMINI_MODEL_NAME=gemini-2.5-flash # Gemini 사용 시
+
+   # Ollama 사용 시
+   # OLLAMA_BASE_URL=http://localhost:11434/v1
+   # OLLAMA_MODEL_NAME=llama2
+
    # 인터넷 검색 시
    SEARCH_API_KEY=your_serper_api_key
    # Telegram 사용 시
@@ -134,7 +163,7 @@ def example_tool(arg1: str, arg2: int) -> str:
     """
     이 툴은 arg1과 arg2를 사용하여 어떤 작업을 수행합니다.
     사용자가 X를 요청할 때 이 툴을 사용하세요.
-    
+
     Args:
         arg1: 첫 번째 인자에 대한 설명입니다.
         arg2: 두 번째 인자에 대한 설명입니다.
