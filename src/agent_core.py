@@ -282,7 +282,8 @@ CORE RULES:
 
 if __name__ == "__main__":
 
-    print(f"my_agent - Core Module (Provider: {os.getenv('AI_PROVIDER', 'gemini')})")
+    print(
+        f"my_agent - Core Module (Provider: {os.getenv('AI_PROVIDER', 'gemini')})")
     print("-" * 50)
 
     agent = MyAgent()
@@ -304,6 +305,7 @@ if __name__ == "__main__":
                 for part in response.candidates[0].content.parts:
                     if hasattr(part, 'function_call') and part.function_call:
                         call = part.function_call
-                        print(f"[Tool Call] {call.name}({getattr(call, 'arguments', getattr(call, 'args', ''))})")
+                        print(
+                            f"[Tool Call] {call.name}({getattr(call, 'arguments', getattr(call, 'args', ''))})")
     except KeyboardInterrupt:
         print("\nExiting my_agent...")
