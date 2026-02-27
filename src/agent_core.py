@@ -159,7 +159,8 @@ class OllamaProvider(BaseProvider):
         session.append({"role": "user", "content": prompt})
 
         all_parts = []
-        max_iterations = 5
+        max_iterations = 15
+
         for _ in range(max_iterations):
             response = self.client.chat.completions.create(
                 model=self.model_name,
