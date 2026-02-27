@@ -129,11 +129,16 @@ class GeminiProvider(BaseProvider):
             session = self.create_session()
 
         response = session.send_message(prompt)
+
         # Ensure compatibility
         if hasattr(response, 'candidates') and response.candidates:
-            for part in response.candidates[0].content.parts:
-                if hasattr(part, 'call') and part.call:
-                    part.function_call = part.call
+            candidate = response.candidates[0]
+
+            if candidate.content and hasattr(candidate.content, 'parts'):
+                for part in response.candidates[0].content.parts:
+                    if hasattr(part, 'call') and part.call:
+                        part.function_call = part.call
+
         return response
 
 

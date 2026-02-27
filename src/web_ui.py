@@ -37,14 +37,12 @@ if st.session_state.get("show_doc_in_chat_trigger"):
     if doc_info:
         selected_doc = doc_info["selected_doc"]
 
-        with st.spinner("my_agent is thinking..."):
+        with st.spinner("my_agent is reading..."):
             # Send to agent as if user typed it
             # This call is blocking, and the spinner will be visible during its execution.
             user_prompt_for_agent = f"Please output the content of the file at '{selected_doc}'."
             _ = agent.send_message(
                 user_prompt_for_agent, st.session_state.chat_session)
-
-            st.rerun()
 
 # User input
 if prompt := st.chat_input("Ask my_agent a question or give a command..."):
