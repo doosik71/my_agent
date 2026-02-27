@@ -19,7 +19,7 @@ logging.basicConfig(
 )
 
 # Initialize MyAgent
-agent = MyAgent(model_name=os.getenv("GEMINI_MODEL_NAME", "gemini-2.0-flash"))
+agent = MyAgent()
 
 # Authorized user IDs
 # Convert string of comma-separated IDs to a set of integers for efficient lookup
@@ -48,10 +48,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Get or create chat session for this user
     if user_id not in user_sessions:
-        user_sessions[user_id] = agent.client.chats.create(
-            model=agent.model_name,
-            config=agent.config
-        )
+        user_sessions[user_id] = agent.create_session()
 
     chat_session = user_sessions[user_id]
 
@@ -103,4 +100,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nTelegram Bot stopped.")

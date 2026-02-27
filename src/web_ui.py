@@ -12,8 +12,7 @@ st.markdown("---")
 
 # Initialize MyAgent
 if "my_agent_instance" not in st.session_state:
-    st.session_state.my_agent_instance = MyAgent(
-        model_name=os.getenv("GEMINI_MODEL_NAME", "gemini-2.5-flash"))
+    st.session_state.my_agent_instance = MyAgent()
 
 agent = st.session_state.my_agent_instance
 
@@ -23,10 +22,7 @@ if "messages" not in st.session_state:
 
 # Initialize chat session if it doesn't exist
 if "chat_session" not in st.session_state:
-    st.session_state.chat_session = agent.client.chats.create(
-        model=agent.model_name,
-        config=agent.config
-    )
+    st.session_state.chat_session = agent.create_session()
 
 # Display chat messages from history on app rerun
 for message in st.session_state.messages:
@@ -55,10 +51,7 @@ if prompt := st.chat_input("Ask my_agent a question or give a command..."):
 
                     if part.function_call:
                         call = part.function_call
-                        st.info(
-                            f"🛠️ **Tool Called:** `{call.name}`\n\n"
-                            f"**Input:** `{call.args}`"
-                        )
+                        st.info(f"🛠️ **Tool Called:** `{call.name}`")
             else:
                 st.error(getattr(response_obj, 'text',
                          "Unknown Error Occurred"))
