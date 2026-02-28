@@ -1,13 +1,14 @@
 import sys
 import subprocess
 import os
+import argparse
 
 
 # Get the absolute path of the directory containing my_agent.py
 project_root = os.path.dirname(os.path.abspath(__file__))
 
 
-def _setup_pythonpath_env():
+def _setup_pythonpath_env(base_dir=None):
     """
     Prepares the environment variables, adding the project root to PYTHONPATH.
     Returns the modified environment dictionary.
@@ -17,15 +18,21 @@ def _setup_pythonpath_env():
         env["PYTHONPATH"] = project_root + os.pathsep + env["PYTHONPATH"]
     else:
         env["PYTHONPATH"] = project_root
+    
+    if base_dir:
+        env["DOCS_BASE_DIR"] = os.path.abspath(base_dir)
+        
     return env
 
 
-def run_web(env):
+def run_web(env, port=None):
     print("Starting Web UI...")
     # Get the absolute path to src/web_ui.py
     web_ui_path = os.path.join(project_root, "src", "web_ui.py")
-    subprocess.run([sys.executable, "-m", "streamlit",
-                   "run", web_ui_path], env=env)
+    cmd = [sys.executable, "-m", "streamlit", "run", web_ui_path]
+    if port:
+        cmd.extend(["--server.port", str(port)])
+    subprocess.run(cmd, env=env)
 
 
 def run_telegram(env):
@@ -36,27 +43,20 @@ def run_telegram(env):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="My Agent CLI")
+    parser.add_argument("--run", choices=["web", "telegram"], required=True, help="Target to run")
+    parser.add_argument("--dir", default="docs", help="Base directory for DocumentManager (default: docs)")
+    parser.add_argument("--port", type=int, help="Port for the Streamlit server (default: use Streamlit's default)")
+    
+    args = parser.parse_args()
+
     # Set up the environment for subprocesses
-    subprocess_env = _setup_pythonpath_env()
+    subprocess_env = _setup_pythonpath_env(args.dir)
 
-    if len(sys.argv) < 3:
-        print("Usage: python my_agent.py run [web|telegram]")
-        return
-
-    command = sys.argv[1]
-    target = sys.argv[2]
-
-    if command == "run":
-        if target == "web":
-            run_web(subprocess_env)
-        elif target == "telegram":
-            run_telegram(subprocess_env)
-        else:
-            print(f"Unknown target: {target}")
-            print("Supported targets: web, telegram")
-    else:
-        print(f"Unknown command: {command}")
-        print("Usage: python my_agent.py run [web|telegram]")
+    if args.run == "web":
+        run_web(subprocess_env, args.port)
+    elif args.run == "telegram":
+        run_telegram(subprocess_env)
 
 
 if __name__ == "__main__":

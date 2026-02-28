@@ -1,3 +1,4 @@
+import os
 from .document_manager import DocumentManager
 from .time_utils import get_current_datetime
 from .arxiv_utils import search_arxiv
@@ -7,7 +8,9 @@ from .web_fetch_utils import fetch_web_content
 
 
 # Initialize Document Manager
-doc_manager = DocumentManager()
+# Read base directory from environment variable if provided
+docs_base_dir = os.environ.get("DOCS_BASE_DIR", "docs")
+doc_manager = DocumentManager(base_dir=docs_base_dir)
 
 # Define tools for the model
 tools = [

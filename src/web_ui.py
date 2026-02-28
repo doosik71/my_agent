@@ -4,7 +4,11 @@ import streamlit as st  # pyright: ignore[reportMissingImports]
 import os
 
 
-st.set_page_config(page_title="My Agent", layout="wide")
+st.set_page_config(
+    page_title="My Agent",
+    layout="wide",
+    page_icon=os.path.join(os.path.dirname(__file__), "assets", "favicon.ico")
+)
 
 st.title("🤖 My Agent")
 st.markdown("### Gemini-Powered Autonomous Agent")
