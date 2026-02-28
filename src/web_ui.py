@@ -87,25 +87,46 @@ st.sidebar.title("🤖 My Agent")
 def document_explorer():
     st.subheader("Existing Documents")
 
-    filter_query = st.text_input(
-        "Filter documents",
-        placeholder="Search (Press Enter to apply)",
-        label_visibility="collapsed",
-        key="doc_filter_input"
-    ).lower()
-
     docs_raw = doc_manager.list_docs()
     # 빈 줄 제외 및 리스트 변환
     documents_list = [d.strip()
                       for d in docs_raw.split('\n') if d.strip()] if docs_raw else []
 
     if documents_list and documents_list[0] != "No documents found.":
-        # 필터링 적용
-        if filter_query:
+        # Extract unique folders
+        folder_set = set()
+        for d in documents_list:
+            folder = os.path.dirname(d)
+            folder_set.add(folder if folder else ".")
+
+        folders = ["All"] + sorted(list(folder_set))
+
+        selected_folder = st.selectbox(
+            "Select Folder",
+            folders,
+            index=0,
+            key="folder_selectbox",
+            label_visibility="collapsed"
+        )
+
+        filter_query = st.text_input(
+            "Filter documents",
+            placeholder="Search (Press Enter to apply)",
+            label_visibility="collapsed",
+            key="doc_filter_input"
+        ).lower()
+
+        # Filter by folder
+        if selected_folder != "All":
             filtered_docs = [
-                doc for doc in documents_list if filter_query in doc.lower()]
+                d for d in documents_list if (os.path.dirname(d) or ".") == selected_folder]
         else:
             filtered_docs = documents_list
+
+        # 필터링 적용 (Search query)
+        if filter_query:
+            filtered_docs = [
+                doc for doc in filtered_docs if filter_query in doc.lower()]
 
         if filtered_docs:
             selected_doc = st.selectbox(
