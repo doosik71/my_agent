@@ -4,7 +4,7 @@ import asyncio
 from telegram import Update  # pyright: ignore[reportMissingImports]
 
 from telegram.ext import (  # pyright: ignore[reportMissingImports]
-    ApplicationBuilder, ContextTypes, MessageHandler, filters)
+    ApplicationBuilder, ContextTypes, MessageHandler, filters, CommandHandler)
 from dotenv import load_dotenv  # pyright: ignore[reportMissingImports]
 from src.agent_core import MyAgent
 
@@ -32,6 +32,22 @@ AUTHORIZED_USERS = set(
 user_sessions = {}
 
 
+async def clear_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle the /clear command."""
+    user_id = update.effective_user.id
+
+    # Check if the user is authorized
+    if AUTHORIZED_USERS and user_id not in AUTHORIZED_USERS:
+        logging.warning(f"Unauthorized access attempt from user ID: {user_id}")
+        await update.message.reply_text("Sorry, you don't have access to this bot.")
+        return
+
+    # Reset the session for this user
+    user_sessions[user_id] = agent.create_session()
+    logging.info(f"Chat history cleared for user ID: {user_id}")
+    await update.message.reply_text("Chat history cleared.")
+
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle incoming messages from Telegram."""
     user_id = update.effective_user.id
@@ -40,7 +56,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Check if the user is authorized
     if AUTHORIZED_USERS and user_id not in AUTHORIZED_USERS:
         logging.warning(f"Unauthorized access attempt from user ID: {user_id}")
-        await update.message.reply_text("죄송합니다. 이 봇을 사용할 권한이 없습니다.")
+        await update.message.reply_text("Sorry, you don't have access to this bot.")
         return
 
     if not text:
@@ -91,6 +107,9 @@ def main():
 
     application = ApplicationBuilder().token(token).build()
 
+    # Add handlers
+    application.add_handler(CommandHandler("clear", clear_command))
+    
     message_handler = MessageHandler(
         filters.TEXT & (~filters.COMMAND), handle_message)
     application.add_handler(message_handler)
