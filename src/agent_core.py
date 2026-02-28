@@ -8,6 +8,7 @@ from google.genai import types as gemini_types
 from openai import OpenAI
 from dotenv import load_dotenv  # pyright: ignore[reportMissingImports]
 from src.tools.tool_definitions import tools
+from src.instruction import SYSTEM_INSTRUCTION
 
 # Load environment variables
 load_dotenv()
@@ -111,9 +112,7 @@ class GeminiProvider(BaseProvider):
 
     def _create_config(self):
         tool_instructions = MyAgent._generate_tool_instructions(tools)
-        system_instruction = MyAgent.SYSTEM_INSTRUCTION_TEMPLATE.format(
-            tool_instructions=tool_instructions
-        )
+        system_instruction = SYSTEM_INSTRUCTION + "\n\n" + tool_instructions
         return gemini_types.GenerateContentConfig(
             system_instruction=system_instruction,
             tools=tools,
@@ -152,9 +151,8 @@ class OllamaProvider(BaseProvider):
 
     def create_session(self):
         tool_instructions = MyAgent._generate_tool_instructions(tools)
-        system_msg = MyAgent.SYSTEM_INSTRUCTION_TEMPLATE.format(
-            tool_instructions=tool_instructions
-        )
+        system_msg = SYSTEM_INSTRUCTION + '\n\n' + tool_instructions
+
         return [{"role": "system", "content": system_msg}]
 
     def send_message(self, prompt, session=None):
@@ -212,28 +210,6 @@ class OllamaProvider(BaseProvider):
 
 
 class MyAgent:
-    SYSTEM_INSTRUCTION_TEMPLATE = """
-You are 'my_agent', an autonomous AI assistant.
-Your primary goal is to help the user by managing knowledge and performing tasks.
-
-CORE RULES:
-1. **Storage:** All files are automatically stored in a sandboxed directory.
-2. **Formatting:** Use Markdown (.md) for all documents you create.
-3. **Organization:** Organize information logically, utilizing subdirectories when necessary to maintain order.
-4. **Index Management:** Always maintain 'index.md' as the master log of your knowledge base.
-   - BEFORE reading or writing any file, read 'index.md' to determine the correct path or locate relevant data.
-   - IMMEDIATELY update 'index.md' after creating, modifying, or deleting a file. It must include a brief summary of each file's purpose or content.
-   - When updating 'index.md', include relevant keywords or tags for each file to facilitate faster retrieval.
-5. **Knowledge Retrieval:** BEFORE answering any question, use the 'read_doc' and 'list_docs' tool to search your working directory for relevant information. Prioritize data found in your stored documents over general knowledge.
-6. **Personalization & Memory:** If the user asks about their identity or personal preferences, you MUST check '/user_info.md' first. Use this file to store and update long-term memory about the user.
-7. **Requirement Priority:** Upon receiving any user request, your first action must be to check for '/rules.md' or 'rules.md'. Follow these instructions as the highest priority for task execution.
-8. **Communication:** Always be concise, professional, and helpful in your responses.
-
-{tool_instructions}
-
-9. Always be kind and helpful.
-"""
-
     def __init__(self):
         provider_type = os.getenv("AI_PROVIDER", "gemini").lower()
 

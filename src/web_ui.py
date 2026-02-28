@@ -28,10 +28,15 @@ if "messages" not in st.session_state:
 if "chat_session" not in st.session_state:
     st.session_state.chat_session = agent.create_session()
 
-# Display chat messages from history on app rerun
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+
+# Use a container to hold messages
+msg_container = st.container()
+
+with msg_container:
+    # Display chat messages from history
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
 # Handle showing document content in chat window triggered by sidebar button
 if st.session_state.get("show_doc_in_chat_trigger"):
@@ -43,12 +48,11 @@ if st.session_state.get("show_doc_in_chat_trigger"):
 
         with st.spinner("my_agent is reading..."):
             # Send to agent as if user typed it
-            # This call is blocking, and the spinner will be visible during its execution.
             user_prompt_for_agent = f"Please output the content of the file at '{selected_doc}'."
             _ = agent.send_message(
                 user_prompt_for_agent, st.session_state.chat_session)
 
-# User input
+# User input (this will naturally sit below the container if it doesn't float)
 if prompt := st.chat_input("Ask my_agent a question or give a command..."):
     if prompt.strip() == "/clear":
         st.session_state.messages = []
@@ -57,8 +61,9 @@ if prompt := st.chat_input("Ask my_agent a question or give a command..."):
 
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    with st.chat_message("user"):
-        st.markdown(prompt)
+    with msg_container:
+        with st.chat_message("user"):
+            st.markdown(prompt)
 
     with st.spinner("my_agent is thinking..."):
         # agent_core의 send_message 호출
@@ -66,19 +71,23 @@ if prompt := st.chat_input("Ask my_agent a question or give a command..."):
             prompt, st.session_state.chat_session)
 
         full_response_content = ""
-        with st.chat_message("assistant"):
-            if hasattr(response_obj, 'candidates') and response_obj.candidates:
-                for part in response_obj.candidates[0].content.parts:
-                    if part.text:
-                        st.markdown(part.text)
-                        full_response_content += part.text
-            else:
-                st.error(getattr(response_obj, 'text',
-                         "Unknown Error Occurred"))
-                full_response_content = getattr(response_obj, 'text', "")
+
+        with msg_container:
+            with st.chat_message("assistant"):
+                if hasattr(response_obj, 'candidates') and response_obj.candidates:
+                    for part in response_obj.candidates[0].content.parts:
+                        if part.text:
+                            st.markdown(part.text)
+                            full_response_content += part.text
+                else:
+                    st.error(getattr(response_obj, 'text',
+                                     "Unknown Error Occurred"))
+                    full_response_content = getattr(
+                        response_obj, 'text', "")
 
     st.session_state.messages.append(
         {"role": "assistant", "content": full_response_content})
+
 
 st.sidebar.title("🤖 My Agent")
 
@@ -88,12 +97,12 @@ def document_explorer():
     st.subheader("Existing Documents")
 
     docs_raw = doc_manager.list_docs()
-    # 빈 줄 제외 및 리스트 변환
-    documents_list = [d.strip()
-                      for d in docs_raw.split('\n') if d.strip()] if docs_raw else []
+    # 빈 줄 제외, 리스트 변환 및 정렬하여 순서 보장
+    documents_list = sorted([d.strip()
+                             for d in docs_raw.split('\n') if d.strip()]) if docs_raw else []
 
     if documents_list and documents_list[0] != "No documents found.":
-        # Extract unique folders
+        # Extract unique folders and sort them
         folder_set = set()
         for d in documents_list:
             folder = os.path.dirname(d)
@@ -101,11 +110,24 @@ def document_explorer():
 
         folders = ["All"] + sorted(list(folder_set))
 
+        # 1. 전용 세션 상태 변수 초기화 및 값 유지
+        if "last_folder" not in st.session_state:
+            st.session_state.last_folder = "All"
+
+        try:
+            folder_index = folders.index(st.session_state.last_folder)
+        except ValueError:
+            folder_index = 0
+
+        def on_folder_change():
+            st.session_state.last_folder = st.session_state.folder_selectbox
+
         selected_folder = st.selectbox(
             "Select Folder",
             folders,
-            index=0,
+            index=folder_index,
             key="folder_selectbox",
+            on_change=on_folder_change,
             label_visibility="collapsed"
         )
 
@@ -129,11 +151,26 @@ def document_explorer():
                 doc for doc in filtered_docs if filter_query in doc.lower()]
 
         if filtered_docs:
+            # 2. 문서 선택 상태 유지
+            if "last_doc" not in st.session_state:
+                st.session_state.last_doc = filtered_docs[0]
+
+            try:
+                doc_index = filtered_docs.index(st.session_state.last_doc)
+            except ValueError:
+                doc_index = 0
+
+            def on_doc_change():
+                st.session_state.last_doc = st.session_state.doc_selectbox
+
             selected_doc = st.selectbox(
                 "Select a document to view:",
                 filtered_docs,
-                key="doc_selectbox"
+                index=doc_index,
+                key="doc_selectbox",
+                on_change=on_doc_change
             )
+
             if selected_doc:
                 doc_content = doc_manager.read_doc(selected_doc)
                 st.text_area(f"Content of {selected_doc}",
