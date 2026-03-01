@@ -176,34 +176,27 @@ def document_explorer():
                 st.text_area(f"Content of {selected_doc}",
                              doc_content, height=600)
 
-                # CSS to right-align the button within its container without word-wrapping
-                st.markdown(
-                    """
-                    <style>
-                    div.stElementContainer:has(> .stButton) {
-                        display: flex;
-                        justify-content: flex-end;
-                        width: 100%;
-                    }
-                    .stButton {
-                        width: auto !important;
-                    }
-                    </style>
-                    """,
-                    unsafe_allow_html=True
-                )
+                # Use columns for two buttons side-by-side
+                col1, col2 = st.columns(2)
 
-                if st.button("Show in Conversation Window", key="show_doc_conv_btn"):
-                    agent_response_for_document = f"The content of the file `{selected_doc}` is as follows:\n\n{doc_content}"
-                    st.session_state.messages.append(
-                        {"role": "assistant", "content": agent_response_for_document})
+                with col1:
+                    if st.button("Print Document 🖨️", key="print_doc_btn", use_container_width=True):
+                        agent_response_for_document = f"The content of the file `{selected_doc}` is as follows:\n\n{doc_content}"
+                        st.session_state.messages.append(
+                            {"role": "assistant", "content": agent_response_for_document})
+                        st.rerun()
 
-                    st.session_state.show_doc_in_chat_trigger = True
-                    st.session_state.doc_to_show_in_chat = {
-                        "selected_doc": selected_doc
-                    }
+                with col2:
+                    if st.button("Add to Conversation 💬", key="add_doc_btn", use_container_width=True):
+                        agent_response_for_document = f"The content of the file `{selected_doc}` is as follows:\n\n{doc_content}"
+                        st.session_state.messages.append(
+                            {"role": "assistant", "content": agent_response_for_document})
 
-                    st.rerun()
+                        st.session_state.show_doc_in_chat_trigger = True
+                        st.session_state.doc_to_show_in_chat = {
+                            "selected_doc": selected_doc
+                        }
+                        st.rerun()
         else:
             st.info("No matching documents.")
     else:
