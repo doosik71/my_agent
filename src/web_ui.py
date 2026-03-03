@@ -65,28 +65,33 @@ if prompt := st.chat_input("Ask my_agent a question or give a command..."):
         with st.chat_message("user"):
             st.markdown(prompt)
 
-    with st.spinner("my_agent is thinking..."):
-        # agent_core의 send_message 호출
-        response_obj = agent.send_message(
-            prompt, st.session_state.chat_session)
+    try:
+        with st.spinner("my_agent is thinking..."):
+            # agent_core의 send_message 호출
+            response_obj = agent.send_message(
+                prompt, st.session_state.chat_session)
 
-        full_response_content = ""
+            full_response_content = ""
 
-        with msg_container:
-            with st.chat_message("assistant"):
-                if hasattr(response_obj, 'candidates') and response_obj.candidates:
-                    for part in response_obj.candidates[0].content.parts:
-                        if part.text:
-                            st.markdown(part.text)
-                            full_response_content += part.text
-                else:
-                    st.error(getattr(response_obj, 'text',
-                                     "Unknown Error Occurred"))
-                    full_response_content = getattr(
-                        response_obj, 'text', "")
+            with msg_container:
+                with st.chat_message("assistant"):
+                    if hasattr(response_obj, 'candidates') and response_obj.candidates:
+                        for part in response_obj.candidates[0].content.parts:
+                            if part.text:
+                                st.markdown(part.text)
+                                full_response_content += part.text
+                    else:
+                        st.error(getattr(response_obj, 'text',
+                                        "Unknown Error Occurred"))
+                        full_response_content = getattr(
+                            response_obj, 'text', "")
 
-    st.session_state.messages.append(
-        {"role": "assistant", "content": full_response_content})
+        st.session_state.messages.append(
+            {"role": "assistant", "content": full_response_content})
+    except Exception as e:
+        error_message = f"An error occurred: {e}"
+        st.session_state.messages.append(
+            {"role": "assistant", "content": error_message})
 
 
 st.sidebar.title("🤖 My Agent")
